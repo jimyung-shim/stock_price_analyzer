@@ -17,3 +17,4 @@ dependencies = [
 
 [project.scripts]
 stock-analyzer = "stock_analyzer.cli:main"
+stock-parse = "stock_analyzer.cli_parse:main"

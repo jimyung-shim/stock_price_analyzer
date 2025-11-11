@@ -1,3 +1,4 @@
+# src/stock_analyzer/analysis.py
 from __future__ import annotations
 from dataclasses import dataclass, asdict
 from typing import Dict, Any
@@ -11,6 +12,13 @@ from .indicators import (
 
 TRADING_DAYS = 252
 
+def _get_close(df: pd.DataFrame) -> pd.Series:
+    if "Adj Close" in df.columns:
+        return df["Adj Close"]
+    if "Close" in df.columns:
+        return df["Close"]
+    raise KeyError("Neither 'Adj Close' nor 'Close' present in DataFrame.")
+
 @dataclass
 class PerfSummary:
     start: str
@@ -22,13 +30,12 @@ class PerfSummary:
     max_drawdown: float
     avg_daily_return: float
     std_daily_return: float
-
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
 
 def compute_indicators(df: pd.DataFrame) -> pd.DataFrame:
     out = df.copy()
-    close = out["Adj Close"]
+    close = _get_close(out)
     out["SMA20"] = sma(close, 20)
     out["SMA50"] = sma(close, 50)
     out["EMA12"] = ema(close, 12)
@@ -49,14 +56,9 @@ def compute_indicators(df: pd.DataFrame) -> pd.DataFrame:
     return out
 
 def performance_summary(df: pd.DataFrame, risk_free_rate_annual: float = 0.0) -> PerfSummary:
-    """
-    Compute classic performance stats from Adj Close and daily returns.
-    Sharpe uses (excess) daily return * sqrt(252).
-    """
-    if "Adj Close" not in df.columns:
-        raise ValueError("DataFrame must include 'Adj Close' column.")
-    ret = df["Adj Close"].pct_change().dropna()
-    total_return = (df["Adj Close"].iloc[-1] / df["Adj Close"].iloc[0]) - 1.0
+    close = _get_close(df)
+    ret = close.pct_change().dropna()
+    total_return = float(close.iloc[-1] / close.iloc[0] - 1.0)
     n_days = (df.index[-1] - df.index[0]).days
     years = max(n_days / 365.25, 1e-9)
     cagr = (1 + total_return) ** (1 / years) - 1 if total_return > -1 else -1.0
@@ -65,7 +67,7 @@ def performance_summary(df: pd.DataFrame, risk_free_rate_annual: float = 0.0) ->
     excess = ret - rf_daily
     sharpe = (excess.mean() / excess.std()) * np.sqrt(TRADING_DAYS) if excess.std() and len(excess) > 2 else float("nan")
 
-    mdd = max_drawdown(df["Adj Close"])
+    mdd = max_drawdown(close)
     return PerfSummary(
         start=str(df.index[0].date()),
         end=str(df.index[-1].date()),
