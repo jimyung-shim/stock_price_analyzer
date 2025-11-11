@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "stock-analyzer"
+version = "0.1.0"
+description = "CLI Stock Price Analyzer (Pandas + yfinance)"
+requires-python = ">=3.9"
+dependencies = [
+  "pandas>=2.2",
+  "numpy>=1.26",
+  "yfinance>=0.2.44",
+  "matplotlib>=3.8",
+  "python-dateutil>=2.9",
+]
+
+[project.scripts]
+stock-analyzer = "stock_analyzer.cli:main"
