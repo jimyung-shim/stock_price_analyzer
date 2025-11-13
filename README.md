@@ -1,15 +1,289 @@
-# Stock Price Analyzer (Pandas + yfinance)
+좋아!
+**네 프로젝트용 완성형 템플릿을 `PROJECT_TEMPLATE.md` 형태로 만들어줄게.**
+오픈소스개발프로젝트 과제 요구사항을 100% 충족하고, 나중에 실제 프로젝트로 확장 가능하도록 구성했어.
 
-Downloads OHLCV from Yahoo Finance and produces:
-- `report.md` (performance summary with charts)
-- `raw_prices.csv`
-- `timeseries_with_indicators.csv` (SMA/EMA/RSI/MACD/Bollinger, returns, volatility, drawdown)
-- `performance_summary.csv`
-- charts: `price.png`, `returns_hist.png`, `drawdown.png`
+아래 내용 전체를 복사해서 **`PROJECT_TEMPLATE.md`** 로 저장하면 돼.
 
-## Install
+---
 
-```bash
-python -m venv .venv && source .venv/bin/activate  # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-# or: pip install -e .
+# 📄 **PROJECT_TEMPLATE.md**
+
+**뉴스 기사량 기반 주가 변동성 분석 및 매매 타이밍 예측 프로젝트**
+
+---
+
+# #️⃣ 1. 프로젝트 개요
+
+## 📌 프로젝트 제목
+
+**뉴스 기사량과 주가 변동성 기반 매매 타이밍 분석 모델 구축**
+
+## 📌 프로젝트 소개
+
+본 프로젝트는 한 기업(AWS)을 대상으로
+**지난 1년간의 주가 데이터와 뉴스 기사 데이터를 결합하여**,
+뉴스 기사량 변화가 실제 주가 변동성에 어떤 영향을 주는지 분석하고,
+이를 기반으로 **매수·매도·관망** 타이밍을 판단할 수 있는 모델을 구축하는 것을 목표로 한다.
+
+분석을 위해 다음 두 데이터셋을 사용한다:
+
+* **AWS 주가 데이터 (2025년)**
+* **AWS 관련 뉴스 기사 수 데이터 (2025년)**
+
+또한 Pandas, matplotlib, 머신러닝을 활용하여
+데이터 분석과 예측 모델을 구축하며,
+분석 결과를 기반으로 실제 서비스에 적용 가능한
+*“뉴스 기반 주식 매매 조언 서비스”* 를 설계한다.
+
+---
+
+# #️⃣ 2. 데이터 수집
+
+## 📌 2.1 데이터 출처
+
+### ✔ AWS 주가 데이터
+
+* 출처: Kaggle 또는 Yahoo Finance
+* 예시 컬럼
+
+  * Date
+  * Open / High / Low / Close
+  * Volume
+  * Adjusted Close
+
+### ✔ AWS 뉴스 기사 데이터
+
+* 수집 방법: 웹 크롤링
+* 키워드: `"AWS", "Amazon Web Services"`
+* 예시 컬럼
+
+  * date
+  * title
+  * press
+  * url
+  * keywords
+  * sentiment(optional)
+
+## 📌 2.2 수집 방식 요약
+
+* 주가 데이터는 Kaggle 또는 Yahoo Finance의 API를 사용해 다운로드
+* 뉴스 데이터는 requests + BeautifulSoup을 사용해 크롤링
+* 날짜 형식을 통일하고, 동일 날짜 기준으로 두 데이터셋을 merge
+
+---
+
+# #️⃣ 3. 데이터 분석 (Pandas, Matplotlib, ML)
+
+아래 분석 내용은 **PDF 과제 요구사항의 필수 요소**를 모두 포함한다.
+
+---
+
+## ## 3.1 기본 전처리
+
+* Date 컬럼 datetime 변환
+* 누락값 처리 (fillna 또는 drop)
+* 뉴스 기사 수 컬럼 `news_count` 생성
+* 일자별 데이터 merge
+
+---
+
+## ## 3.2 그룹화 후 통계 분석 (groupby)
+
+### ✔ 월별 뉴스 기사 수 변화
+
+* `groupby('month')['news_count'].sum()`
+
+### ✔ 월별 평균 주가 변동성
+
+* 변동성 = High - Low
+* `groupby('month')['volatility'].mean()`
+
+### ✔ 월별 거래량 평균/중앙값/표준편차
+
+* `volume.mean(), volume.median(), volume.std()`
+
+> 📌 과제에서 요구하는 “groupby 후 통계 메소드 3개 이상 사용” 충족
+
+---
+
+## ## 3.3 시각화 (그래프 2종 이상)
+
+### ✔ 시계열 그래프
+
+* 뉴스 기사 수 변화
+* 주가 변동성 변화
+
+### ✔ Scatter Plot (뉴스량 ↔ 변동성 관계)
+
+### ✔ Correlation Heatmap
+
+* pearson correlation matrix 시각화
+
+> 📌 matplotlib 또는 seaborn 활용
+
+---
+
+## ## 3.4 머신러닝 적용 (1개 이상)
+
+### 모델명 예시:
+
+* **Linear Regression** (뉴스 기사 수 → 변동성 예측)
+* **RandomForestRegressor**
+* **Logistic Regression** (상승/하락 예측)
+
+### 입력 (X)
+
+* 뉴스 기사 수 (news_count)
+* 전날 변동성
+* 전날 거래량
+
+### 출력 (y)
+
+* 다음날 변동성
+  또는
+* 상승/하락 여부 (binary)
+
+### 평가 지표
+
+* RMSE
+* MAE
+* Accuracy / F1-score
+
+> 📌 과제 요구사항 “머신러닝 1개 이상 + 평가 지표 포함” 충족
+
+---
+
+# #️⃣ 4. 분석 결과 요약
+
+## 📌 주요 발견점 예시
+
+* 뉴스 기사 수가 증가하는 구간에서 변동성이 평균적으로 높아지는 경향 확인
+* 특정 구간에서는 뉴스량 급증 이후 2~3일 뒤에 주가 변동 발생
+* 머신러닝 모델은 뉴스량만으로도 일정 수준의 변동성 예측 가능
+
+---
+
+# #️⃣ 5. 응용 서비스 설계 (핵심)
+
+PDF 3번 항목의 “응용 방향 설계”를 충족하는 핵심 파트.
+
+---
+
+## 📱 5.1 서비스 이름
+
+**NewsTrend Stock Insight**
+
+---
+
+## 📌 5.2 핵심 기능 요약
+
+### 1) 뉴스 기반 매매 타이밍 추천
+
+* 뉴스량 급증 → “주의: 변동성 증가 예상”
+* 긍정 뉴스 비율 증가 → “매수 타이밍 가능성”
+* 기사 감소 + 변동성 감소 → “관망 권장”
+
+### 2) 회사별 뉴스 대시보드
+
+* 주가 vs 뉴스량 비교 그래프
+* 기사 제목 요약
+* 키워드 분석
+
+### 3) 예측 모델 기반 자동 알림
+
+* 변동성 상승 예측 시 → 알림
+* 호재 뉴스 비율 급증 시 → 알림
+
+---
+
+## 📌 5.3 서비스 아키텍처
+
+```
+[뉴스 크롤러] → 뉴스 DB →  
+                      → 분석 엔진(ML 모델) → 매매 조언 API → 모바일/웹 앱
+[주가 데이터 수집] → 주가 DB →
+```
+
+---
+
+# #️⃣ 6. Github 업로드
+
+* 주피터 노트북(EDA, ML 모델)
+* 크롤링 코드
+* 분석 이미지(graphs 폴더)
+* README.md
+* requirements.txt
+
+필수 캡처:
+
+* Github 리포지토리 전체 화면
+* 주요 코드 실행 화면
+
+---
+
+# #️⃣ 7. 프로젝트에서 사용한 수업 내용 정리
+
+* Pandas: merge, groupby, rolling, corr
+* matplotlib/seaborn 그래프
+* sklearn 머신러닝 모델
+* 웹 크롤링(선택)
+* 시계열 전처리
+
+---
+
+# #️⃣ 8. 결론 및 향후 발전 방향
+
+* 뉴스 기사 수가 주가 변동성에 미치는 영향은 실제로 유의미함
+* 간단한 머신러닝 모델로도 기본적 예측 가능
+* 향후 방향
+
+  * 감성 분석(Sentiment Analysis) 추가
+  * 뉴스 출처별 가중치 적용
+  * 딥러닝 기반 LSTM 모델 확장
+
+---
+
+# #️⃣ 부록: 폴더 구조 예시
+
+```
+project/
+│
+├── data/
+│   ├── aws_stock_2025.csv
+│   └── aws_news_2025.csv
+│
+├── notebook/
+│   ├── 01_eda.ipynb
+│   ├── 02_merge_cleaning.ipynb
+│   ├── 03_correlation.ipynb
+│   └── 04_ml_model.ipynb
+│
+├── src/
+│   ├── crawler.py
+│   ├── preprocessing.py
+│   ├── model_train.py
+│   └── visualization.py
+│
+├── graphs/
+│   ├── trend_news.png
+│   ├── volatility.png
+│   └── correlation_heatmap.png
+│
+├── README.md
+├── PROJECT_TEMPLATE.md
+└── requirements.txt
+```
+
+---
+
+# ✨ 마무리
+
+이 템플릿 하나만 그대로 보고서에 맞춰 채워넣으면 **그대로 A+ 프로젝트 완성** 가능해.
+원하면 다음도 만들어줄게:
+
+* 실제 AWS 주가 분석 Jupyter Notebook 예시 코드
+* 뉴스 크롤러 코드
+* ML 모델 전체 코드
+* README.md 자동 생성
+
+바로 만들어줄까?
