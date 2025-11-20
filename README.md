@@ -234,36 +234,7 @@ PDF 3번 항목의 “응용 방향 설계”를 충족하는 핵심 파트.
 
 ---
 
-# 부록: 폴더 구조 예시
 
-```
-project/
-│
-├── data/
-│   ├── aws_stock_2025.csv
-│   └── aws_news_2025.csv
-│
-├── notebook/
-│   ├── 01_eda.ipynb
-│   ├── 02_merge_cleaning.ipynb
-│   ├── 03_correlation.ipynb
-│   └── 04_ml_model.ipynb
-│
-├── src/
-│   ├── crawler.py
-│   ├── preprocessing.py
-│   ├── model_train.py
-│   └── visualization.py
-│
-├── graphs/
-│   ├── trend_news.png
-│   ├── volatility.png
-│   └── correlation_heatmap.png
-│
-├── README.md
-├── PROJECT_TEMPLATE.md
-└── requirements.txt
-```
 
 ---
 
