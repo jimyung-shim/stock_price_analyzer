@@ -7,37 +7,57 @@ import yfinance as yf
 WANTED_COLS = ["Open", "High", "Low", "Close", "Adj Close", "Volume"]
 
 def _flatten_columns(df: pd.DataFrame, ticker: str) -> pd.DataFrame:
+    # 1. MultiIndex 처리: 티커 레벨 제거 시도
     if isinstance(df.columns, pd.MultiIndex):
         # Prefer inner level (fields) for single ticker
         try:
-            # If there’s only one symbol level, drop it
-            if len(pd.unique(df.columns.get_level_values(0))) == 1:
-                df = df.droplevel(0, axis=1)
-            else:
-                df = df.xs(ticker, axis=1, level=0)
+            # 레벨이 2개 이상일 때, ticker가 포함된 레벨을 찾아 제거
+            df.columns = df.columns.droplevel(1)
         except Exception:
-            # Fallback: join tuples → "SPY Adj Close"
+            pass
+
+        # 여전히 MultiIndex라면 그냥 문자열로 합침
+        if isinstance(df.columns, pd.MultiIndex):
             df.columns = [" ".join(map(str, c)).strip() for c in df.columns]
-    else:
-        df.columns = [str(c).strip().title() for c in df.columns]
 
-    # Map any "SPY Adj Close" → "Adj Close" etc.
-    cols = list(df.columns)
-    rename_map = {}
-    for wanted in WANTED_COLS:
-        if wanted in cols:
-            continue
-        for c in cols:
-            if c.endswith(wanted):
-                rename_map[c] = wanted
-                break
-    if rename_map:
-        df = df.rename(columns=rename_map)
+    # 2. 문자열 표준화 (Title Case 변환)
+    # 예: 'close' -> 'Close', 'Close AMZN' -> 'Close Amzn'
+    df.columns = [str(c).strip().title() for c in df.columns]
 
-    # Keep standard fields if present
+    # 3. 핵심 컬럼 매핑
+    # 컬럼명에 'Close', 'Open' 등이 포함되어 있으면 해당 이름으로 변경
+    new_cols = {}
+    current_cols = list(df.columns)
+    
+    # WANTED_COLS: ["Open", "High", "Low", "Close", "Adj Close", "Volume"]
+    # "Adj Close"가 "Close"보다 먼저 매핑되도록 길이 역순 정렬 등의 주의가 필요하지만,
+    # 여기서는 명시적으로 체크.
+    
+    for col in current_cols:
+        if "Adj Close" in col:
+            new_cols[col] = "Adj Close"
+        elif "Close" in col:
+            new_cols[col] = "Close"
+        elif "Open" in col:
+            new_cols[col] = "Open"
+        elif "High" in col:
+            new_cols[col] = "High"
+        elif "Low" in col:
+            new_cols[col] = "Low"
+        elif "Volume" in col:
+            new_cols[col] = "Volume"
+
+    if new_cols:
+        df = df.rename(columns=new_cols)
+
+    # 4. 중복 컬럼 제거 (혹시라도 중복이 생겼을 경우)
+    df = df.loc[:, ~df.columns.duplicated()]
+
+    # 5. 최종 필터링
     keep = [c for c in WANTED_COLS if c in df.columns]
     if keep:
         df = df[keep]
+
     return df
 
 def fetch_prices(
@@ -61,6 +81,9 @@ def fetch_prices(
         raise ValueError(f"No data returned for {ticker}. Check ticker/date range/interval.")
 
     df.index = pd.to_datetime(df.index).tz_localize(None)
+
+    print(f"DEBUG: Columns form yfinance: {df.columns}")
+
     df = _flatten_columns(df, ticker)
 
     # Ensure consistent columns and always set 'Adj Close'
