@@ -19,7 +19,7 @@ def _flatten_columns(df: pd.DataFrame, ticker: str) -> pd.DataFrame:
             # Fallback: join tuples → "SPY Adj Close"
             df.columns = [" ".join(map(str, c)).strip() for c in df.columns]
     else:
-        df.columns = [str(c).strip() for c in df.columns]
+        df.columns = [str(c).strip().title() for c in df.columns]
 
     # Map any "SPY Adj Close" → "Adj Close" etc.
     cols = list(df.columns)

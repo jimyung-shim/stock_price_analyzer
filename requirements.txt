@@ -3,3 +3,5 @@ numpy>=1.26
 yfinance>=0.2.44
 matplotlib>=3.8
 python-dateutil>=2.9
+requests>=2.0
+python-dotenv
