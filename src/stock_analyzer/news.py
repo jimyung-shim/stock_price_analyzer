@@ -47,7 +47,7 @@ def _fetch_daily_google_news_count(
 
     # 기사가 많을 경우 2~5페이지까지 추가 탐색 (최대 50개까지 카운트)
     # 3년치 데이터를 수집해야 하므로, 속도를 위해 5페이지로 제한하는 것이 현실적입니다.
-    max_pages = 5 
+    max_pages = 10 
     
     for page in range(2, max_pages + 1):
         try:
@@ -121,7 +121,7 @@ def fetch_news_counts_for_ticker(
         return pd.DataFrame(records), out_path
 
     print(f"🔍 Starting deep crawl for '{query}' from {start_dt.date()} to {end_dt.date()}")
-    print("   (Checking up to 5 pages per day to capture trends...)")
+    print("   (Checking up to 10 pages per day to capture trends...)")
     
     try:
         for d in _date_range(start_dt, end_dt):
