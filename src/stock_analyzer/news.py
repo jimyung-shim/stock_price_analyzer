@@ -37,38 +37,39 @@ def _fetch_daily_google_news_count(
     googlenews.search(query)
     
     # 첫 페이지 결과 수 확인
-    results = googlenews.result()
-    count = len(results)
+    try:
+        results = googlenews.result()
+        count = len(results)
+    except Exception:
+        # 검색 결과 자체가 에러인 경우
+        googlenews.clear()
+        return 0
     
     # 첫 페이지가 10개 미만이면 더 볼 필요 없음 (그게 전체 개수임)
     if count < 10:
         googlenews.clear()
         return count
 
-    # 기사가 많을 경우 2~5페이지까지 추가 탐색 (최대 50개까지 카운트)
-    # 3년치 데이터를 수집해야 하므로, 속도를 위해 5페이지로 제한하는 것이 현실적입니다.
-    max_pages = 10 
+    # 기사가 많을 경우 2~5페이지까지 추가 탐색
+    max_pages = 5 
     
     for page in range(2, max_pages + 1):
         try:
+            # [수정됨] 페이지 넘길 때 대기 시간 대폭 증가 (0.5초 -> 3~5초 랜덤)
+            time.sleep(random.uniform(3.0, 5.0))
+            
             googlenews.get_page(page)
             new_results = googlenews.result()
             new_count = len(new_results)
             
-            # 더 이상 기사가 늘어나지 않으면(마지막 페이지 도달) 중단
             if new_count == count:
                 break
             
             count = new_count
             
-            # 페이지 넘길 때마다 아주 짧은 대기 (기계적 접근 방지)
-            time.sleep(0.5)
-            
         except Exception:
-            # 페이지 로드 실패 시 현재까지 카운트 반환
             break
             
-    # 다음 날짜를 위해 결과 초기화 (필수)
     googlenews.clear()
     return count
 
@@ -78,8 +79,9 @@ def fetch_news_counts_for_ticker(
     start: str,
     end: str,
     out_dir: str | Path = "raw/news_data",
-    sleep_min: float = 1.5,
-    sleep_max: float = 3.0,
+    # [수정됨] 기본 대기 시간 대폭 증가 (기존 1.5~3.0 -> 6.0~10.0)
+    sleep_min: float = 6.0,
+    sleep_max: float = 12.0,
 ) -> Tuple[pd.DataFrame, Path]:
     """
     Google News를 크롤링하여 일별 기사 수(Trend)를 저장합니다.
@@ -99,8 +101,8 @@ def fetch_news_counts_for_ticker(
     filename = f"{safe_query}_news_counts_{start}_to_{end}.csv"
     out_path = out_dir / filename
 
-    # 이어하기(Resume) 기능
     records = []
+    # 이어하기 로직
     if out_path.exists():
         try:
             print(f"📂 Found existing file: {out_path}. Checking last date...")
@@ -120,19 +122,24 @@ def fetch_news_counts_for_ticker(
         print("✅ All data already collected.")
         return pd.DataFrame(records), out_path
 
-    print(f"🔍 Starting deep crawl for '{query}' from {start_dt.date()} to {end_dt.date()}")
-    print("   (Checking up to 10 pages per day to capture trends...)")
+    print(f"🔍 Starting Slow & Safe crawl for '{query}' from {start_dt.date()} to {end_dt.date()}")
     
     try:
-        for d in _date_range(start_dt, end_dt):
+        for i, d in enumerate(_date_range(start_dt, end_dt)):
             d_str = d.strftime(DATE_FMT_ISO)
             
+            # [추가] 10일마다 한 번씩 아주 길게 쉬기 (30초)
+            if i > 0 and i % 10 == 0:
+                print("☕ Taking a long coffee break (30s) to avoid detection...")
+                time.sleep(30)
+
             try:
                 count = _fetch_daily_google_news_count(googlenews, query, d)
             except Exception as e:
                 print(f"⚠️ Error on {d_str}: {e}")
+                # 429 에러 발생 시 1분간 대기 후 0 처리 (다음으로 넘어감)
+                time.sleep(60)
                 count = 0 
-                time.sleep(5) # 에러 시 잠시 대기
 
             print(f"   [{d_str}] found: {count} articles")
             
@@ -142,17 +149,15 @@ def fetch_news_counts_for_ticker(
                 "count": count,
             })
 
-            # 데이터 유실 방지를 위해 5일마다 저장
             if len(records) % 5 == 0:
                 pd.DataFrame(records).to_csv(out_path, index=False)
 
-            # 차단 방지 대기
+            # 일일 수집 간 대기 시간 (랜덤 6~12초)
             time.sleep(random.uniform(sleep_min, sleep_max))
 
     except KeyboardInterrupt:
         print("\n🛑 Crawling interrupted by user. Saving progress...")
     
-    # 최종 저장
     df = pd.DataFrame(records)
     df.to_csv(out_path, index=False)
     
