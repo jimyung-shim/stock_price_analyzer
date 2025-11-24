@@ -12,14 +12,14 @@
 ## 📌 프로젝트 소개
 
 본 프로젝트는 한 기업(AWS)을 대상으로
-**지난 3년간의 주가 데이터와 뉴스 기사 데이터를 결합하여**,
+**지난 15년간의 주가 데이터와 뉴스 기사 데이터를 결합하여**,
 뉴스 기사량 변화가 실제 주가 변동성에 어떤 영향을 주는지 분석하고,
 이를 기반으로 **매수·매도·관망** 타이밍을 판단할 수 있는 모델을 구축하는 것을 목표로 한다.
 
 분석을 위해 다음 두 데이터셋을 사용한다:
 
-* **AWS 주가 데이터 (2022년 2월 1일 ~ 2025년 2월 19일)**
-* **AWS 관련 뉴스 기사 수 데이터 (2022년 2월 ~ 2025년 2월)**
+* **AWS 주가 데이터 (2006년 12월 4일 ~ 2021년 10월 18일)**
+* **AWS 관련 뉴스 기사 수 데이터 (2006년 12월 4일 ~ 2021년 10월 18일)**
 
 또한 Pandas, matplotlib, 머신러닝을 활용하여
 데이터 분석과 예측 모델을 구축하며,
@@ -34,31 +34,28 @@
 
 ### ✔ AWS 주가 데이터
 
-* 출처: Kaggle 또는 Yahoo Finance
-* 예시 컬럼
+* 출처: Kaggle
+* column
 
-  * Date
-  * Open / High / Low / Close
-  * Volume
-  * Adjusted Close
+  * date
+  * open / high / low / close
+  * adjusted_close
+  * volume
 
-### ✔ AWS 뉴스 기사 데이터
 
-* 수집 방법: 웹 크롤링
-* 키워드: `"AWS", "Amazon Web Services"`
-* 예시 컬럼
+### ✔ 뉴스 기사 데이터
+
+* 출처: Kaggle
+* column
 
   * date
   * title
-  * press
-  * url
-  * keywords
-  * sentiment(optional)
+  * sentiment
+  * description
 
 ## 📌 2.2 수집 방식 요약
 
-* 주가 데이터는 Kaggle 또는 Yahoo Finance의 API를 사용해 다운로드
-* 뉴스 데이터는 requests + BeautifulSoup을 사용해 크롤링
+* 주가 데이터, 뉴스 데이터는 Kaggle
 * 날짜 형식을 통일하고, 동일 날짜 기준으로 두 데이터셋을 merge
 
 ---
