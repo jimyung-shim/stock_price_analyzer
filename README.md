@@ -121,7 +121,7 @@ python src/project\_analysis\_final.py
 * 실행 후 src/out/graphs/ 폴더에서 분석 그래프를 확인할 수 있습니다.
 
 ## **7\. 프로젝트 파일 구조**
-
+```
 stock\_price\_analyzer/  
 ├── README.md                  \# 프로젝트 설명서  
 ├── requirements.txt           \# 의존성 패키지 목록  
@@ -137,7 +137,7 @@ stock\_price\_analyzer/
     ├── project\_analysis\_final.py \# 통계/시각화/ML 분석 메인  
     └── out/                   \# 결과물 저장소    
         └── graphs/            \# 분석 이미지 저장 경로
-
+```
 ## **8\. 결론 (Conclusion)**
 
 뉴스 텍스트 데이터는 주가 변동성을 설명하는 **'제4의 변수'**로서 충분한 잠재력을 가지고 있습니다. 본 프로젝트는 딥러닝(LSTM)이나 뉴스 출처별 가중치 적용 등으로 확장될 경우, 더욱 정교한 금융 예측 모델로 발전할 수 있습니다.
