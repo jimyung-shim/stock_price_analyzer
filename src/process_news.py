@@ -1,4 +1,4 @@
-# src/process_news.py
+# CNBC 데이터 가공하는 코드
 import pandas as pd
 from pathlib import Path
 from textblob import TextBlob # 감성 분석용

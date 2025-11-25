@@ -1,4 +1,4 @@
-# src/project_analysis_final.py
+# 데이터 분석 코드
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt

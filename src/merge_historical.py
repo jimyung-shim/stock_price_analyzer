@@ -1,4 +1,4 @@
-# src/merge_historical.py
+# AWS 주가 데이터, CNBC 데이터 merge 하는 코드
 import pandas as pd
 from pathlib import Path
 
