@@ -126,7 +126,7 @@ stock\_price\_analyzer/
 ├── README.md                  \# 프로젝트 설명서  
 ├── requirements.txt           \# 의존성 패키지 목록  
 ├── dataset/
-    └── final\_dataset\_2006\_2021.csv
+│   └── final\_dataset\_2006\_2021.csv  
 ├── raw/                       \# 원본 데이터 폴더 (Kaggle)  
 │   ├── cnbc.txt  
 │   └── stock\_data/  
